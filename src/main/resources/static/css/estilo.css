@@ -1,0 +1,56 @@
+/* Cores e fonte do AgendaFácil. Altere aqui para mudar o visual do sistema inteiro. */
+:root {
+    --af-petroleo: #0F4C5C;
+    --af-petroleo-escuro: #0A3642;
+    --af-mostarda: #E3A72F;
+    --af-fundo: #F4F7F6;
+    --af-texto: #1D2B2F;
+}
+
+body {
+    font-family: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--af-fundo);
+    color: var(--af-texto);
+}
+
+.af-navbar { background: var(--af-petroleo); }
+
+.af-btn-primario {
+    background: var(--af-petroleo);
+    border-color: var(--af-petroleo);
+    color: #fff;
+}
+.af-btn-primario:hover,
+.af-btn-primario:focus-visible {
+    background: var(--af-petroleo-escuro);
+    border-color: var(--af-petroleo-escuro);
+    color: #fff;
+}
+
+.af-btn-sair {
+    border: 1px solid rgba(255, 255, 255, .6);
+    color: #fff;
+}
+.af-btn-sair:hover { background: rgba(255, 255, 255, .15); color: #fff; }
+
+.af-titulo { font-weight: 700; margin-bottom: .75rem; }
+
+/* Login */
+.af-login { padding-top: 12vh; }
+.af-marca {
+    font-weight: 700;
+    font-size: 2.5rem;
+    color: var(--af-petroleo);
+    border-bottom: 4px solid var(--af-mostarda);
+    display: inline-block;
+    padding-bottom: .25rem;
+    margin-bottom: 1rem;
+}
+.af-painel {
+    background: #fff;
+    border: 1px solid #DCE4E2;
+    border-radius: .75rem;
+    padding: 1.5rem;
+}
+
+:focus-visible { outline: 3px solid var(--af-mostarda); outline-offset: 2px; }

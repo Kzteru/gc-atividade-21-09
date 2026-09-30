@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Início')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+    <h1 class="af-titulo" th:text="'Olá, ' + ${usuario.nome}">Olá</h1>
+
+    <div sec:authorize="hasRole('CLIENTE')">
+        <p class="lead">Escolha um serviço e veja os horários livres, a qualquer hora do dia.</p>
+        <a class="btn af-btn-primario btn-lg" th:href="@{/agendamentos/novo}">Agendar um horário</a>
+    </div>
+
+    <div sec:authorize="hasAnyRole('PROFISSIONAL','ADMIN')">
+        <p class="lead">Veja sua agenda, cadastre serviços e bloqueie horários de pausa.</p>
+        <a class="btn af-btn-primario btn-lg" th:href="@{/agenda}">Abrir minha agenda</a>
+    </div>
+</main>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>
