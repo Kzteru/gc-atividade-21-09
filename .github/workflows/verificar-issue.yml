@@ -1,0 +1,20 @@
+name: Verificar issue
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+jobs:
+  verificar-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: O PR precisa citar uma issue
+        env:
+          CORPO: ${{ github.event.pull_request.body }}
+        run: |
+          if echo "$CORPO" | grep -Eiq '(close[sd]?|fix(e[sd])?|resolve[sd]?) #[0-9]+'; then
+            echo "Issue vinculada encontrada."
+          else
+            echo "::error::Escreva no texto do PR 'Closes #NUMERO' com o número da issue da tarefa."
+            exit 1
+          fi
