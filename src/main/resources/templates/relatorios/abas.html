@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<!--
+  Abas da área de Relatórios (dupla 4).
+  Uso: <ul th:replace="~{relatorios/abas :: abas('faturamento')}"></ul>   ou   abas('clientes')
+-->
+<body>
+<ul th:fragment="abas(ativa)" class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link" th:classappend="${ativa == 'faturamento'} ? 'active'"
+           th:href="@{/relatorios}">Faturamento</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" th:classappend="${ativa == 'clientes'} ? 'active'"
+           th:href="@{/relatorios/clientes}">Histórico de clientes</a>
+    </li>
+</ul>
+
+<th:block th:fragment="mensagens">
+    <div th:if="${sucesso}" class="alert alert-success" role="status" th:text="${sucesso}"></div>
+    <div th:if="${erro}" class="alert alert-danger" role="alert" th:text="${erro}"></div>
+</th:block>
+</body>
+</html>
