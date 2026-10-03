@@ -14,4 +14,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     boolean existsByEmail(String email);
 
     List<Usuario> findByPerfilAndAtivoTrueOrderByNome(Perfil perfil);
+
+    /** Todos do perfil, inclusive inativos (tela de profissionais do admin). */
+    List<Usuario> findByPerfilOrderByNome(Perfil perfil);
 }

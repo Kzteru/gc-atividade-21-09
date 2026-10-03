@@ -21,13 +21,15 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Páginas públicas
                 .requestMatchers(antMatcher("/login"), antMatcher("/cadastro"),
-                        antMatcher("/css/**"), antMatcher("/js/**")).permitAll()
+                        antMatcher("/css/**"), antMatcher("/js/**"), antMatcher("/error")).permitAll()
                 .requestMatchers(PathRequest.toH2Console()).permitAll()
                 // Áreas restritas por perfil (as telas ainda serão criadas pelas duplas)
                 .requestMatchers(antMatcher("/agenda/**"), antMatcher("/servicos/**"),
                         antMatcher("/horarios/**"), antMatcher("/bloqueios/**"))
                     .hasAnyRole("PROFISSIONAL", "ADMIN")
                 .requestMatchers(antMatcher("/relatorios/**")).hasAnyRole("PROFISSIONAL", "ADMIN")
+                // Administração (dupla 1): cadastro de profissionais
+                .requestMatchers(antMatcher("/admin/**")).hasRole("ADMIN")
                 // Todo o resto exige login
                 .anyRequest().authenticated())
             .formLogin(form -> form
