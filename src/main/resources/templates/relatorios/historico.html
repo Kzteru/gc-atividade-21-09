@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Histórico do cliente')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+    <h1 class="af-titulo">Relatórios</h1>
+    <ul th:replace="~{relatorios/abas :: abas('clientes')}"></ul>
+    <th:block th:replace="~{relatorios/abas :: mensagens}"></th:block>
+
+    <p><a th:href="@{/relatorios/clientes}">&larr; Voltar para a lista de clientes</a></p>
+
+    <h2 class="h3" th:text="${cliente.nome}">Ana Cliente</h2>
+    <p class="text-body-secondary">
+        <span th:text="${cliente.email}">ana@email.com</span>
+        <span th:if="${cliente.telefone}" th:text="' · ' + ${cliente.telefone}"></span>
+    </p>
+
+    <!-- Preferências gerais do cliente -->
+    <form th:action="@{/relatorios/clientes/{id}/observacoes(id=${cliente.id})}" method="post" class="af-painel mb-4">
+        <label for="observacoes" class="form-label fw-bold">Preferências do cliente</label>
+        <textarea id="observacoes" name="observacoes" class="form-control mb-2" rows="2" maxlength="1000"
+                  placeholder="Ex.: prefere máquina 2, alergia a determinado produto..."
+                  th:text="${cliente.observacoes}"></textarea>
+        <button type="submit" class="btn btn-sm af-btn-primario">Salvar preferências</button>
+    </form>
+
+    <h3 class="h5 mb-3">Atendimentos</h3>
+    <div th:if="${#lists.isEmpty(agendamentos)}" class="af-painel">Este cliente ainda não tem atendimentos.</div>
+
+    <div th:each="a : ${agendamentos}" class="af-painel mb-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+            <div>
+                <strong th:text="${a.servico.nome}">Corte de cabelo</strong>
+                <span class="text-body-secondary"
+                      th:text="' · ' + ${#temporals.format(a.inicio, 'dd/MM/yyyy HH:mm')} + ' · com ' + ${a.profissional.nome}"></span>
+                <div class="small text-body-secondary"
+                     th:text="'R$ ' + ${#numbers.formatDecimal(a.valor, 1, 'POINT', 2, 'COMMA')}">R$ 40,00</div>
+            </div>
+            <th:block th:switch="${a.status.name()}">
+                <span th:case="'CONCLUIDO'" class="badge text-bg-success">Concluído</span>
+                <span th:case="'FALTOU'" class="badge text-bg-danger">Faltou</span>
+                <span th:case="'CANCELADO'" class="badge text-bg-secondary">Cancelado</span>
+                <span th:case="'CONFIRMADO'" class="badge text-bg-info">Confirmado</span>
+                <span th:case="*" class="badge text-bg-warning">Agendado</span>
+            </th:block>
+        </div>
+
+        <p th:if="${a.observacoesCliente}" class="small mb-2">
+            <strong>Observação do cliente:</strong> <span th:text="${a.observacoesCliente}"></span>
+        </p>
+
+        <!-- Concluído / Faltou: só aparece depois do horário e se o atendimento ainda está em aberto -->
+        <form th:if="${pendentes.contains(a.id)}"
+              th:action="@{/relatorios/clientes/{c}/agendamentos/{id}/resultado(c=${cliente.id}, id=${a.id})}"
+              method="post" class="d-flex gap-2 mb-2">
+            <button type="submit" name="status" value="CONCLUIDO" class="btn btn-sm btn-success">Concluído</button>
+            <button type="submit" name="status" value="FALTOU" class="btn btn-sm btn-outline-danger">Faltou</button>
+        </form>
+
+        <form th:action="@{/relatorios/clientes/{c}/agendamentos/{id}/anotacoes(c=${cliente.id}, id=${a.id})}"
+              method="post">
+            <label th:for="'anotacoes-' + ${a.id}" class="form-label small mb-1">Anotações do profissional</label>
+            <div class="d-flex gap-2">
+                <textarea th:id="'anotacoes-' + ${a.id}" name="anotacoes" class="form-control form-control-sm"
+                          rows="1" maxlength="1000" th:text="${a.anotacoesProfissional}"></textarea>
+                <button type="submit" class="btn btn-sm btn-outline-secondary">Salvar</button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>
