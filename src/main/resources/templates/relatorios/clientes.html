@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Histórico de clientes')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+    <h1 class="af-titulo">Relatórios</h1>
+    <ul th:replace="~{relatorios/abas :: abas('clientes')}"></ul>
+    <th:block th:replace="~{relatorios/abas :: mensagens}"></th:block>
+
+    <p class="text-body-secondary">Escolha um cliente para ver os atendimentos, as anotações e registrar presença ou falta.</p>
+
+    <div th:if="${#lists.isEmpty(clientes)}" class="af-painel">Nenhum cliente cadastrado.</div>
+
+    <div th:unless="${#lists.isEmpty(clientes)}" class="af-painel p-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+            <tr>
+                <th scope="col">Nome</th>
+                <th scope="col">E-mail</th>
+                <th scope="col">Telefone</th>
+                <th scope="col"><span class="visually-hidden">Ações</span></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="c : ${clientes}">
+                <td th:text="${c.nome}">Ana</td>
+                <td th:text="${c.email}">ana@email.com</td>
+                <td th:text="${c.telefone} ?: '—'">—</td>
+                <td class="text-end">
+                    <a class="btn btn-sm af-btn-primario" th:href="@{/relatorios/clientes/{id}(id=${c.id})}">Ver histórico</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>
