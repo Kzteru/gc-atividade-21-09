@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Serviços')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container py-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <h1 class="af-titulo mb-0">Serviços</h1>
+        <a class="btn af-btn-primario" th:href="@{/servicos/novo}">Cadastrar serviço</a>
+    </div>
+    <th:block th:replace="~{fragments/layout :: mensagens}"></th:block>
+    <div th:if="${#lists.isEmpty(servicos)}" class="af-painel">Nenhum serviço cadastrado.</div>
+    <div th:unless="${#lists.isEmpty(servicos)}" class="af-painel p-0 table-responsive">
+        <table class="table align-middle mb-0">
+            <thead><tr><th>Nome</th><th>Duração</th><th>Preço</th><th>Situação</th><th>Ações</th></tr></thead>
+            <tbody><tr th:each="s : ${servicos}" th:classappend="${s.ativo} ? '' : 'af-inativo'">
+                <td><strong th:text="${s.nome}">Corte</strong><div class="small text-muted" th:text="${s.descricao}"></div></td>
+                <td th:text="${s.duracaoMinutos} + ' min'">30 min</td>
+                <td th:text="${'R$ ' + #numbers.formatDecimal(s.preco, 1, 'POINT', 2, 'COMMA')}">R$ 40,00</td>
+                <td><span class="badge" th:classappend="${s.ativo} ? ' text-bg-success' : ' text-bg-secondary'" th:text="${s.ativo} ? 'Ativo' : 'Desativado'">Ativo</span></td>
+                <td class="text-end text-nowrap">
+                    <a class="btn btn-sm btn-outline-primary" th:href="@{/servicos/{id}/editar(id=${s.id})}">Editar</a>
+                    <form class="d-inline" method="post" th:action="@{/servicos/{id}/ativo(id=${s.id})}">
+                        <button class="btn btn-sm btn-outline-secondary" type="submit" th:text="${s.ativo} ? 'Desativar' : 'Ativar'">Desativar</button>
+                    </form>
+                </td>
+            </tr></tbody>
+        </table>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: rodape}"></footer><th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body></html>

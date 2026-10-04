@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Serviço')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container py-5" style="max-width: 760px">
+    <h1 class="af-titulo mb-4" th:text="${servico.id == null} ? 'Novo serviço' : 'Editar serviço'">Novo serviço</h1>
+    <th:block th:replace="~{fragments/layout :: mensagens}"></th:block>
+    <form class="af-painel" th:action="@{/servicos/salvar}" th:object="${servico}" method="post">
+        <input type="hidden" th:field="*{id}">
+        <div class="mb-3"><label class="form-label" for="nome">Nome</label><input class="form-control" id="nome" th:field="*{nome}" required maxlength="120"><div class="text-danger small" th:errors="*{nome}"></div></div>
+        <div class="mb-3"><label class="form-label" for="descricao">Descrição</label><textarea class="form-control" id="descricao" th:field="*{descricao}" rows="3" maxlength="500"></textarea><div class="text-danger small" th:errors="*{descricao}"></div></div>
+        <div class="row"><div class="col-md-6 mb-3"><label class="form-label" for="duracaoMinutos">Duração (minutos)</label><input class="form-control" id="duracaoMinutos" type="number" min="5" step="1" th:field="*{duracaoMinutos}" required><div class="text-danger small" th:errors="*{duracaoMinutos}"></div></div>
+        <div class="col-md-6 mb-3"><label class="form-label" for="preco">Preço (R$)</label><input class="form-control" id="preco" type="number" min="0" step="0.01" th:field="*{preco}" required><div class="text-danger small" th:errors="*{preco}"></div></div></div>
+        <div class="d-flex gap-2"><button class="btn af-btn-primario" type="submit">Salvar</button><a class="btn btn-outline-secondary" th:href="@{/servicos}">Cancelar</a></div>
+    </form>
+</main>
+<footer th:replace="~{fragments/layout :: rodape}"></footer><th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body></html>

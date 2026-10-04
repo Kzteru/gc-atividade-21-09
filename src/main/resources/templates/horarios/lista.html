@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Horários de trabalho')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container py-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"><h1 class="af-titulo mb-0">Horários de trabalho</h1><a class="btn btn-outline-primary" th:href="@{/bloqueios(profissionalId=${profissionalId})}">Gerenciar bloqueios</a></div>
+    <th:block th:replace="~{fragments/layout :: mensagens}"></th:block>
+    <form th:if="${admin}" method="get" th:action="@{/horarios}" class="af-painel mb-4"><label class="form-label" for="profissionalId">Profissional</label><div class="d-flex gap-2"><select class="form-select" id="profissionalId" name="profissionalId" required><option value="">Selecione</option><option th:each="p : ${profissionais}" th:value="${p.id}" th:selected="${p.id == profissionalId}" th:text="${p.nome}">Profissional</option></select><button class="btn btn-outline-primary" type="submit">Abrir</button></div></form>
+    <section th:if="${profissionalId != null}" class="af-painel mb-4">
+        <h2 class="h4" th:text="${form.id == null} ? 'Adicionar período de trabalho' : 'Editar período de trabalho'">Adicionar período</h2>
+        <p class="text-muted">Cadastre dois períodos no mesmo dia para reservar o intervalo de almoço.</p>
+        <form th:action="@{/horarios/salvar(profissionalId=${profissionalId})}" th:object="${form}" method="post">
+            <input type="hidden" th:field="*{id}">
+            <div class="row align-items-end"><div class="col-lg-4 mb-3"><label class="form-label" for="diaSemana">Dia da semana</label><select class="form-select" id="diaSemana" th:field="*{diaSemana}" required><option value="">Selecione</option><option th:each="d : ${dias}" th:value="${d.key}" th:text="${d.value}">Segunda-feira</option></select></div>
+                <div class="col-lg-3 mb-3"><label class="form-label" for="horaInicio">Início</label><input class="form-control" id="horaInicio" type="time" th:field="*{horaInicio}" required></div>
+                <div class="col-lg-3 mb-3"><label class="form-label" for="horaFim">Fim</label><input class="form-control" id="horaFim" type="time" th:field="*{horaFim}" required></div>
+                <div class="col-lg-2 mb-3 d-flex gap-2"><button class="btn af-btn-primario" type="submit">Salvar</button><a th:if="${form.id != null}" class="btn btn-outline-secondary" th:href="@{/horarios(profissionalId=${profissionalId})}">Cancelar</a></div></div>
+        </form>
+    </section>
+    <div th:if="${profissionalId != null and #lists.isEmpty(horarios)}" class="af-painel">Nenhum horário cadastrado. Adicione o primeiro período de trabalho.</div>
+    <div th:if="${profissionalId != null and not #lists.isEmpty(horarios)}" class="af-painel p-0 table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Dia</th><th>Início</th><th>Fim</th><th>Ações</th></tr></thead><tbody>
+        <tr th:each="h : ${horarios}"><td th:text="${dias[h.diaSemana]}">Segunda-feira</td><td th:text="${h.horaInicio}">09:00</td><td th:text="${h.horaFim}">12:00</td><td class="text-end text-nowrap"><a class="btn btn-sm btn-outline-primary" th:href="@{/horarios/{id}/editar(id=${h.id},profissionalId=${profissionalId})}">Editar</a><form class="d-inline" method="post" th:action="@{/horarios/{id}/excluir(id=${h.id},profissionalId=${profissionalId})}"><button class="btn btn-sm btn-outline-danger" type="submit">Excluir</button></form></td></tr>
+    </tbody></table></div>
+</main>
+<footer th:replace="~{fragments/layout :: rodape}"></footer><th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body></html>
