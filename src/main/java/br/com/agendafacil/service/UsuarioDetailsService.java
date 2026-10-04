@@ -19,7 +19,8 @@ public class UsuarioDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return usuarioRepository.findByEmail(email)
+       // Mesmo formato usado no cadastro: "Ana@Email.com " vira "ana@email.com"
+        return usuarioRepository.findByEmail(UsuarioService.normalizarEmail(email))
                 .filter(u -> u.isAtivo())
                 .map(u -> User.withUsername(u.getEmail())
                         .password(u.getSenha())

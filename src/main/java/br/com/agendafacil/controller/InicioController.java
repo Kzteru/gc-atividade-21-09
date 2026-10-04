@@ -21,7 +21,10 @@ public class InicioController {
     }
 
     @GetMapping("/login")
-    public String login() {
+    public String login(Principal principal) {
+        if (principal != null) {
+            return "redirect:/"; // já está logado
+        }
         return "login";
     }
 

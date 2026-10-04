@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Cadastrar profissional')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5 af-conteudo-estreito">
+    <a th:href="@{/admin/profissionais}" class="d-inline-block mb-3">Voltar para profissionais</a>
+    <h1 class="af-titulo">Cadastrar profissional</h1>
+    <p class="text-body-secondary mb-4">
+        Passe o e-mail e a senha para o profissional. Ele pode trocar a senha depois em "Meu perfil".
+    </p>
+
+    <th:block th:replace="~{fragments/layout :: mensagens}"></th:block>
+
+    <form th:action="@{/admin/profissionais/novo}" th:object="${form}" method="post" class="af-painel" novalidate>
+        <div class="mb-3">
+            <label for="nome" class="form-label">Nome</label>
+            <input type="text" th:field="*{nome}" class="form-control" th:errorclass="is-invalid" required autofocus>
+            <div class="invalid-feedback" th:errors="*{nome}"></div>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">E-mail</label>
+            <input type="email" th:field="*{email}" class="form-control" th:errorclass="is-invalid"
+                   autocomplete="off" required>
+            <div class="invalid-feedback" th:errors="*{email}"></div>
+        </div>
+        <div class="mb-3">
+            <label for="telefone" class="form-label">Telefone <span class="text-body-secondary">(opcional)</span></label>
+            <input type="tel" th:field="*{telefone}" class="form-control" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{telefone}"></div>
+        </div>
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6">
+                <label for="senha" class="form-label">Senha inicial</label>
+                <input type="password" th:field="*{senha}" class="form-control" th:errorclass="is-invalid"
+                       autocomplete="new-password" required>
+                <div class="invalid-feedback" th:errors="*{senha}"></div>
+            </div>
+            <div class="col-sm-6">
+                <label for="confirmacaoSenha" class="form-label">Repita a senha</label>
+                <input type="password" th:field="*{confirmacaoSenha}" class="form-control"
+                       th:errorclass="is-invalid" autocomplete="new-password" required>
+                <div class="invalid-feedback" th:errors="*{confirmacaoSenha}"></div>
+            </div>
+        </div>
+        <button type="submit" class="btn af-btn-primario">Cadastrar profissional</button>
+    </form>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>
