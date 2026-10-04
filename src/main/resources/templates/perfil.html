@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Meu perfil')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5 af-conteudo-estreito">
+    <h1 class="af-titulo">Meu perfil</h1>
+    <p class="text-body-secondary mb-4">
+        Você entra com <strong th:text="${usuario.email}">email</strong>.
+        O e-mail não pode ser alterado por aqui.
+    </p>
+
+    <th:block th:replace="~{fragments/layout :: mensagens}"></th:block>
+
+    <form th:action="@{/perfil}" th:object="${form}" method="post" novalidate>
+        <section class="af-painel mb-4">
+            <h2 class="h5 mb-3">Seus dados</h2>
+            <div class="mb-3">
+                <label for="nome" class="form-label">Nome</label>
+                <input type="text" th:field="*{nome}" class="form-control" th:errorclass="is-invalid"
+                       autocomplete="name" required>
+                <div class="invalid-feedback" th:errors="*{nome}"></div>
+            </div>
+            <div>
+                <label for="telefone" class="form-label">Telefone <span class="text-body-secondary">(opcional)</span></label>
+                <input type="tel" th:field="*{telefone}" class="form-control" th:errorclass="is-invalid"
+                       autocomplete="tel">
+                <div class="invalid-feedback" th:errors="*{telefone}"></div>
+            </div>
+        </section>
+
+        <section class="af-painel mb-4">
+            <h2 class="h5 mb-1">Trocar senha</h2>
+            <p class="small text-body-secondary mb-3">Deixe em branco para manter a senha atual.</p>
+            <div class="mb-3">
+                <label for="senhaAtual" class="form-label">Senha atual</label>
+                <input type="password" th:field="*{senhaAtual}" class="form-control" autocomplete="current-password">
+            </div>
+            <div class="row g-3">
+                <div class="col-sm-6">
+                    <label for="novaSenha" class="form-label">Nova senha</label>
+                    <input type="password" th:field="*{novaSenha}" class="form-control" th:errorclass="is-invalid"
+                           autocomplete="new-password">
+                    <div class="invalid-feedback" th:errors="*{novaSenha}"></div>
+                </div>
+                <div class="col-sm-6">
+                    <label for="confirmacaoNovaSenha" class="form-label">Repita a nova senha</label>
+                    <input type="password"
