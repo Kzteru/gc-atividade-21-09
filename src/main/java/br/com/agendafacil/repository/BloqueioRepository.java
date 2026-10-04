@@ -24,5 +24,14 @@ public interface BloqueioRepository extends JpaRepository<Bloqueio, Long> {
                              @Param("inicio") LocalDateTime inicio,
                              @Param("fim") LocalDateTime fim);
 
+    @Query("select count(b) from Bloqueio b where b.profissional.id = :profissionalId " +
+            "and b.inicio < :fim and b.fim > :inicio and (:ignorarId is null or b.id <> :ignorarId)")
+    long contarSobreposicoesExceto(@Param("profissionalId") Long profissionalId,
+                                   @Param("inicio") LocalDateTime inicio,
+                                   @Param("fim") LocalDateTime fim,
+                                   @Param("ignorarId") Long ignorarId);
+
     List<Bloqueio> findByProfissionalIdAndFimAfterOrderByInicio(Long profissionalId, LocalDateTime aPartirDe);
+
+    List<Bloqueio> findByProfissionalIdOrderByInicio(Long profissionalId);
 }
