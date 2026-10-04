@@ -46,4 +46,17 @@
                 </div>
                 <div class="col-sm-6">
                     <label for="confirmacaoNovaSenha" class="form-label">Repita a nova senha</label>
-                    <input type="password"
+                    <input type="password" th:field="*{confirmacaoNovaSenha}" class="form-control"
+                           autocomplete="new-password">
+                </div>
+            </div>
+        </section>
+
+        <button type="submit" class="btn af-btn-primario">Salvar alterações</button>
+    </form>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>
