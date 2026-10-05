@@ -64,6 +64,9 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> 
                                                                         LocalDateTime de,
                                                                         LocalDateTime ate);
 
+    /** Agenda de todos os profissionais em um período (tela "Minha agenda" do admin). */
+    List<Agendamento> findByInicioBetweenOrderByInicio(LocalDateTime de, LocalDateTime ate);
+
     /** Agendamentos do cliente, do mais recente para o mais antigo (histórico - dupla 4). */
     List<Agendamento> findByClienteIdOrderByInicioDesc(Long clienteId);
 

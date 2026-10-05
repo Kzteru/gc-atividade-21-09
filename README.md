@@ -81,6 +81,19 @@ Cancelamento e remarcação exigem antecedência mínima, configurada em
 O menu já tem links para essas telas; eles dão erro 404 até cada dupla criar o controller correspondente.
 Use o `InicioController` e o `index.html` como modelo.
 
+## Telas de agendamento (dupla 3)
+
+| Perfil | Menu | Endereço | O que faz |
+|--------|------|----------|-----------|
+| Cliente | Agendar | `/agendamentos/novo` | Escolhe serviço, profissional e dia, vê só os horários livres e confirma (com observação opcional) |
+| Cliente | Meus agendamentos | `/agendamentos` | Próximos atendimentos com **Remarcar** e **Cancelar** (até 24 h antes) e lista dos anteriores |
+| Profissional | Minha agenda | `/agenda` | Agenda do dia ou da semana, com **Confirmar**, **Cancelar** e, depois do horário, **Concluído** / **Faltou** |
+| Admin | Minha agenda | `/agenda` | Mesma tela com a agenda de todos os profissionais e filtro por profissional |
+
+Regras que ficam no `AgendamentoService`: o cliente só mexe nos próprios agendamentos; o profissional só
+nos dele (o admin em todos); o profissional pode cancelar sem a antecedência mínima, mas só antes do
+atendimento começar; profissional desativado não recebe novos agendamentos. Testes em `AgendaServiceTest`.
+
 ## Como trabalhar com o Git
 
 1. Antes de começar: `git checkout main` e `git pull`.

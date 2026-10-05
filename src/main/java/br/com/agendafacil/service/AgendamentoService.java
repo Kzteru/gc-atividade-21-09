@@ -105,7 +105,7 @@ public class AgendamentoService {
      * É isso que a tela de agendamento mostra ao cliente.
      */
     @Transactional(readOnly = true)
-    public List<LocalDateTime> horariosDisponiveis(Long profissionalId, Long servicoId, LocalDate data) {
+    public List<LocalDateTime> horariosDisponiveis(Long profissionalId, Long servicoId, LocalDate data, Long id) {
         Servico servico = buscarServico(servicoId);
         int duracao = servico.getDuracaoMinutos();
         LocalDateTime agora = LocalDateTime.now();
@@ -207,5 +207,48 @@ public class AgendamentoService {
     private Agendamento buscarAgendamento(Long id) {
         return agendamentoRepository.findById(id)
                 .orElseThrow(() -> new RegraNegocioException("Agendamento não encontrado."));
+    }
+
+    public List<Agendamento> agenda(Long alvoId, LocalDate de, LocalDate ate) {
+        return List.of();
+    }
+
+    public void buscarDoCliente(Long id, Long id1) {
+    }
+
+    public boolean podeConfirmar(Agendamento agendamento) {
+        return false;
+    }
+
+    public boolean podeCancelarPeloProfissional(Agendamento agendamento) {
+        return false;
+    }
+
+    public void verificarSeClientePodeAlterar(Agendamento agendamento) {
+    }
+
+    public List<Agendamento> agendamentosDoCliente(Long id) {
+        return List.of();
+    }
+
+    public void confirmar(Long id) {
+    }
+
+    public void cancelarPeloProfissional(Long id) {
+    }
+
+    public void buscarParaGestao(Long agendamentoId, Usuario usuario) {
+    }
+
+    public boolean clientePodeAlterar(Agendamento agendamento) {
+        return false;
+    }
+
+    public Object servicosAtivos() {
+        return null;
+    }
+
+    public Object profissionaisAtivos() {
+        return null;
     }
 }

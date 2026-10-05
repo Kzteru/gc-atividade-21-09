@@ -119,7 +119,7 @@ class AgendamentoServiceTest {
     @Test
     void horariosDisponiveisNaoMostramOcupadosNemAlmoco() {
         agendar(cliente, segundaAs(10, 0));
-        List<LocalDateTime> livres = service.horariosDisponiveis(profissional.getId(), corte.getId(), segundaFutura());
+        List<LocalDateTime> livres = service.horariosDisponiveis(profissional.getId(), corte.getId(), segundaFutura(), agendamento.getId());
 
         assertTrue(livres.contains(segundaAs(9, 0)));
         assertFalse(livres.contains(segundaAs(10, 0)));

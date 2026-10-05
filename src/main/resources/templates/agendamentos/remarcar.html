@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Remarcar')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <h1 class="af-titulo mb-0">Remarcar agendamento</h1>
+        <a class="btn btn-outline-primary" th:href="@{/agendamentos}">Voltar</a>
+    </div>
+    <th:block th:replace="~{fragments/layout :: mensagens}"></th:block>
+
+    <div class="af-painel mb-4">
+        <div class="small text-body-secondary">Horário atual</div>
+        <div class="fw-bold fs-5"
+             th:text="${#temporals.format(agendamento.inicio, 'dd/MM/yyyy')} + ' às ' + ${#temporals.format(agendamento.inicio, 'HH:mm')}">
+            12/10/2026 às 10:00
+        </div>
+        <div>
+            <span th:text="${agendamento.servico.nome}">Corte de cabelo</span>
+            <span class="text-body-secondary" th:text="' com ' + ${agendamento.profissional.nome}">com Carlos</span>
+        </div>
+    </div>
+
+    <form method="get" th:action="@{/agendamentos/{id}/remarcar(id=${agendamento.id})}" class="af-painel mb-4">
+        <h2 class="h5 mb-3">1. Escolha o novo dia</h2>
+        <div class="row align-items-end">
+            <div class="col-sm-6 col-lg-3 mb-3">
+                <label class="form-label" for="data">Dia</label>
+                <input class="form-control" type="date" id="data" name="data" required
+                       th:value="${data}" th:min="${hoje}">
+            </div>
+            <div class="col-sm-6 col-lg-2 mb-3">
+                <button class="btn af-btn-primario w-100" type="submit">Ver horários</button>
+            </div>
+        </div>
+    </form>
+
+    <section class="af-painel">
+        <h2 class="h5 mb-1">2. Escolha o novo horário</h2>
+        <p class="text-body-secondary mb-3" th:text="${dataPorExtenso}">Segunda-feira, 12 de outubro</p>
+
+        <p th:if="${#lists.isEmpty(horarios)}" class="mb-0">Nenhum horário livre neste dia. Tente outro dia.</p>
+
+        <form th:unless="${#lists.isEmpty(horarios)}" method="post"
+              th:action="@{/agendamentos/{id}/remarcar(id=${agendamento.id})}">
+            <th:block th:replace="~{fragments/agendamento :: horarios(${horarios})}"></th:block>
+            <button class="btn af-btn-primario mt-4" type="submit">Confirmar novo horário</button>
+        </form>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>
