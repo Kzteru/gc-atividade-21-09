@@ -6,10 +6,13 @@
 -->
 <body>
 <ul th:fragment="abas(ativa)" class="nav nav-tabs mb-4">
+    <!--/* Aba "Faturamento" desativada até a tela de faturamento ser criada.
+           Quando existir, basta remover este comentário.
     <li class="nav-item">
         <a class="nav-link" th:classappend="${ativa == 'faturamento'} ? 'active'"
            th:href="@{/relatorios}">Faturamento</a>
     </li>
+    */-->
     <li class="nav-item">
         <a class="nav-link" th:classappend="${ativa == 'clientes'} ? 'active'"
            th:href="@{/relatorios/clientes}">Histórico de clientes</a>

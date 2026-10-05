@@ -54,7 +54,7 @@
                     <a class="nav-link" th:href="@{/horarios}">Horários e bloqueios</a>
                 </li>
                 <li class="nav-item" sec:authorize="hasAnyRole('PROFISSIONAL','ADMIN')">
-                    <a class="nav-link" th:href="@{/relatorios}">Relatórios</a>
+                    <a class="nav-link" th:href="@{/relatorios/clientes}">Relatórios</a>
                 </li>
                 <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link" th:href="@{/admin/profissionais}">Profissionais</a>
