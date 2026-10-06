@@ -94,3 +94,21 @@ body:not(.af-login) > main { flex: 1; }
 .af-inativo td { color: #8A979B; }
 
 a { color: var(--af-petroleo); }
+
+/* ---------- Dupla 3: agendamentos ---------- */
+
+/* Grade de botões de horário livre (09:00, 09:30...) */
+.af-horarios {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+    gap: .5rem;
+    max-width: 48rem;
+}
+.af-horario { font-variant-numeric: tabular-nums; }
+.btn-check:checked + .af-horario {
+    background: var(--af-petroleo);
+    border-color: var(--af-petroleo);
+    color: #fff;
+}
+
+.af-badge-hoje { background: var(--af-mostarda); color: var(--af-texto); }

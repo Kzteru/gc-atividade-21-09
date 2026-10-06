@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Agendar')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <h1 class="af-titulo mb-0">Agendar um horário</h1>
+        <a class="btn btn-outline-primary" th:href="@{/agendamentos}">Meus agendamentos</a>
+    </div>
+    <th:block th:replace="~{fragments/layout :: mensagens}"></th:block>
+
+    <!-- Passo 1: escolher serviço, profissional e dia -->
+    <form method="get" th:action="@{/agendamentos/novo}" class="af-painel mb-4">
+        <h2 class="h5 mb-3">1. O que, com quem e quando</h2>
+        <div th:if="${#lists.isEmpty(servicos) or #lists.isEmpty(profissionais)}" class="alert alert-warning mb-3">
+            Ainda não há serviços ou profissionais disponíveis para agendamento.
+        </div>
+        <div class="row align-items-end">
+            <div class="col-lg-4 mb-3">
+                <label class="form-label" for="servicoId">Serviço</label>
+                <select class="form-select" id="servicoId" name="servicoId" required>
+                    <option value="">Selecione</option>
+                    <option th:each="s : ${servicos}" th:value="${s.id}" th:selected="${s.id == servicoId}"
+                            th:text="${s.nome} + ' · ' + ${s.duracaoMinutos} + ' min · R$ ' + ${#numbers.formatDecimal(s.preco, 1, 'POINT', 2, 'COMMA')}">
+                        Corte de cabelo · 30 min · R$ 40,00
+                    </option>
+                </select>
+            </div>
+            <div class="col-lg-3 mb-3">
+                <label class="form-label" for="profissionalId">Profissional</label>
+                <select class="form-select" id="profissionalId" name="profissionalId" required>
+                    <option value="">Selecione</option>
+                    <option th:each="p : ${profissionais}" th:value="${p.id}" th:selected="${p.id == profissionalId}"
+                            th:text="${p.nome}">Carlos Barbeiro</option>
+                </select>
+            </div>
+            <div class="col-lg-3 mb-3">
+                <label class="form-label" for="data">Dia</label>
+                <input class="form-control" type="date" id="data" name="data" required
+                       th:value="${data}" th:min="${hoje}">
+            </div>
+            <div class="col-lg-2 mb-3">
+                <button class="btn af-btn-primario w-100" type="submit">Ver horários</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Passo 2: escolher o horário livre e confirmar -->
+    <section th:if="${buscou}" class="af-painel">
+        <h2 class="h5 mb-1">2. Escolha o horário</h2>
+        <p class="text-body-secondary mb-3" th:text="${dataPorExtenso}">Segunda-feira, 12 de outubro</p>
+
+        <div th:if="${#lists.isEmpty(horarios)}">
+            <p class="mb-2">Nenhum horário livre neste dia.</p>
+            <p class="small text-body-secondary mb-0">Tente outro dia ou outro profissional.</p>
+        </div>
+
+        <form th:unless="${#lists.isEmpty(horarios)}" method="post" th:action="@{/agendamentos/novo}">
+            <input type="hidden" name="servicoId" th:value="${servicoId}">
+            <input type="hidden" name="profissionalId" th:value="${profissionalId}">
+
+            <th:block th:replace="~{fragments/agendamento :: horarios(${horarios})}"></th:block>
+
+            <div class="mt-4 mb-3 af-conteudo-estreito">
+                <label class="form-label" for="observacoes">Observação para o profissional (opcional)</label>
+                <textarea class="form-control" id="observacoes" name="observacoes" rows="2" maxlength="500"
+                          placeholder="Ex.: quero manter o comprimento da franja"></textarea>
+            </div>
+            <button class="btn af-btn-primario" type="submit">Confirmar agendamento</button>
+        </form>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

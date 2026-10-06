@@ -64,6 +64,27 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> 
                                                                         LocalDateTime de,
                                                                         LocalDateTime ate);
 
+    /** Agenda de um profissional no intervalo [de, ate) (dupla 3 / tela "Minha agenda"). */
+    @Query("""
+            select a from Agendamento a
+            where a.profissional.id = :profissionalId
+              and a.inicio >= :de
+              and a.inicio < :ate
+            order by a.inicio
+            """)
+    List<Agendamento> agendaDoProfissional(@Param("profissionalId") Long profissionalId,
+                                           @Param("de") LocalDateTime de,
+                                           @Param("ate") LocalDateTime ate);
+
+    /** Agenda de todos os profissionais no intervalo [de, ate) (tela "Minha agenda" do admin). */
+    @Query("""
+            select a from Agendamento a
+            where a.inicio >= :de
+              and a.inicio < :ate
+            order by a.inicio
+            """)
+    List<Agendamento> agendaGeral(@Param("de") LocalDateTime de, @Param("ate") LocalDateTime ate);
+
     /** Agendamentos do cliente, do mais recente para o mais antigo (histórico - dupla 4). */
     List<Agendamento> findByClienteIdOrderByInicioDesc(Long clienteId);
 

@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,10 +53,10 @@ public class AgendamentoService {
     public Agendamento agendar(Long clienteId, Long profissionalId, Long servicoId,
                                LocalDateTime inicio, String observacoesCliente) {
         Usuario cliente = buscarUsuario(clienteId);
-        Usuario profissional = buscarUsuario(profissionalId);
-        if (profissional.getPerfil() != Perfil.PROFISSIONAL) {
-            throw new RegraNegocioException("O usuário escolhido não é um profissional.");
+        if (cliente.getPerfil() != Perfil.CLIENTE) {
+            throw new RegraNegocioException("Apenas clientes podem marcar horários.");
         }
+        Usuario profissional = buscarProfissionalAtivo(profissionalId);
 
         Servico servico = buscarServico(servicoId);
         LocalDateTime fim = inicio.plusMinutes(servico.getDuracaoMinutos());
@@ -106,6 +107,16 @@ public class AgendamentoService {
      */
     @Transactional(readOnly = true)
     public List<LocalDateTime> horariosDisponiveis(Long profissionalId, Long servicoId, LocalDate data) {
+        return horariosDisponiveis(profissionalId, servicoId, data, null);
+    }
+
+    /**
+     * Mesma lista, mas desconsiderando o agendamento "ignorarId".
+     * Usado na remarcação, para o horário atual do cliente continuar aparecendo como opção.
+     */
+    @Transactional(readOnly = true)
+    public List<LocalDateTime> horariosDisponiveis(Long profissionalId, Long servicoId, LocalDate data, Long ignorarId) {
+        buscarProfissionalAtivo(profissionalId);
         Servico servico = buscarServico(servicoId);
         int duracao = servico.getDuracaoMinutos();
         LocalDateTime agora = LocalDateTime.now();
@@ -121,13 +132,126 @@ public class AgendamentoService {
             while (!horario.plusMinutes(duracao).isAfter(limite)) {
                 LocalDateTime fim = horario.plusMinutes(duracao);
                 // Simples e suficiente para o MVP: uma consulta por horário.
-                if (horario.isAfter(agora) && estaLivre(profissionalId, horario, fim)) {
+                if (horario.isAfter(agora) && estaLivre(profissionalId, horario, fim, ignorarId)) {
                     livres.add(horario);
                 }
                 horario = horario.plusMinutes(INTERVALO_HORARIOS_MINUTOS);
             }
         }
         return livres;
+    }
+
+    // ==================================================================
+    // Telas do cliente (dupla 3): Agendar e Meus agendamentos
+    // ==================================================================
+
+    @Transactional(readOnly = true)
+    public List<Servico> servicosAtivos() {
+        return servicoRepository.findByAtivoTrueOrderByNome();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Usuario> profissionaisAtivos() {
+        return usuarioRepository.findByPerfilAndAtivoTrueOrderByNome(Perfil.PROFISSIONAL);
+    }
+
+    /** Todos os agendamentos do cliente, do mais recente para o mais antigo. */
+    @Transactional(readOnly = true)
+    public List<Agendamento> agendamentosDoCliente(Long clienteId) {
+        return agendamentoRepository.findByClienteIdOrderByInicioDesc(clienteId);
+    }
+
+    /**
+     * Busca um agendamento garantindo que ele pertence ao cliente logado.
+     * Sem isso, um cliente poderia cancelar o horário de outro trocando o id na URL.
+     */
+    @Transactional(readOnly = true)
+    public Agendamento buscarDoCliente(Long agendamentoId, Long clienteId) {
+        Agendamento agendamento = buscarAgendamento(agendamentoId);
+        if (!Objects.equals(agendamento.getCliente().getId(), clienteId)) {
+            // Mesma mensagem de "não existe", para não revelar agendamentos de outras pessoas
+            throw new RegraNegocioException("Agendamento não encontrado.");
+        }
+        return agendamento;
+    }
+
+    /** Usado pela tela para decidir se mostra os botões "Remarcar" e "Cancelar". */
+    public boolean clientePodeAlterar(Agendamento agendamento) {
+        try {
+            verificarSePodeAlterar(agendamento);
+            return true;
+        } catch (RegraNegocioException e) {
+            return false;
+        }
+    }
+
+    public void verificarSeClientePodeAlterar(Agendamento agendamento) {
+        verificarSePodeAlterar(agendamento);
+    }
+
+    // ==================================================================
+    // Tela "Minha agenda" (dupla 3): profissional e admin
+    // ==================================================================
+
+    /**
+     * Agendamentos de um profissional entre os dias "de" e "ate" (inclusive).
+     * Com profissionalId nulo, traz a agenda de todos (visão do admin).
+     */
+    @Transactional(readOnly = true)
+    public List<Agendamento> agenda(Long profissionalId, LocalDate de, LocalDate ate) {
+        LocalDateTime inicio = de.atStartOfDay();
+        LocalDateTime fim = ate.plusDays(1).atStartOfDay();
+        return profissionalId == null
+                ? agendamentoRepository.agendaGeral(inicio, fim)
+                : agendamentoRepository.agendaDoProfissional(profissionalId, inicio, fim);
+    }
+
+    /**
+     * Busca um agendamento garantindo que quem pede pode gerenciá-lo:
+     * o profissional só os próprios, o admin qualquer um, o cliente nenhum.
+     */
+    @Transactional(readOnly = true)
+    public Agendamento buscarParaGestao(Long agendamentoId, Usuario usuario) {
+        Agendamento agendamento = buscarAgendamento(agendamentoId);
+        boolean admin = usuario.getPerfil() == Perfil.ADMIN;
+        boolean dono = usuario.getPerfil() == Perfil.PROFISSIONAL
+                && Objects.equals(agendamento.getProfissional().getId(), usuario.getId());
+        if (!admin && !dono) {
+            throw new RegraNegocioException("Agendamento não encontrado.");
+        }
+        return agendamento;
+    }
+
+    /** O profissional confirma que vai atender. Só vale para AGENDADO que ainda não começou. */
+    @Transactional
+    public void confirmar(Long agendamentoId) {
+        Agendamento agendamento = buscarAgendamento(agendamentoId);
+        if (!podeConfirmar(agendamento)) {
+            throw new RegraNegocioException("Só é possível confirmar agendamentos em aberto que ainda não começaram.");
+        }
+        agendamento.setStatus(StatusAgendamento.CONFIRMADO);
+    }
+
+    public boolean podeConfirmar(Agendamento agendamento) {
+        return agendamento.getStatus() == StatusAgendamento.AGENDADO
+                && agendamento.getInicio().isAfter(LocalDateTime.now());
+    }
+
+    /**
+     * Cancelamento feito pelo PROFISSIONAL ou ADMIN: não exige a antecedência mínima
+     * do cliente (ex.: o profissional ficou doente), mas só antes do atendimento começar.
+     */
+    @Transactional
+    public void cancelarPeloProfissional(Long agendamentoId) {
+        Agendamento agendamento = buscarAgendamento(agendamentoId);
+        if (!podeCancelarPeloProfissional(agendamento)) {
+            throw new RegraNegocioException("Só é possível cancelar agendamentos em aberto que ainda não começaram.");
+        }
+        agendamento.setStatus(StatusAgendamento.CANCELADO);
+    }
+
+    public boolean podeCancelarPeloProfissional(Agendamento agendamento) {
+        return estaEmAberto(agendamento) && agendamento.getInicio().isAfter(LocalDateTime.now());
     }
 
     // ==================================================================
@@ -159,9 +283,9 @@ public class AgendamentoService {
         }
     }
 
-    private boolean estaLivre(Long profissionalId, LocalDateTime inicio, LocalDateTime fim) {
+    private boolean estaLivre(Long profissionalId, LocalDateTime inicio, LocalDateTime fim, Long ignorarId) {
         return bloqueioRepository.contarSobreposicoes(profissionalId, inicio, fim) == 0
-                && !agendamentoRepository.existeConflitoProfissional(profissionalId, inicio, fim, null);
+                && !agendamentoRepository.existeConflitoProfissional(profissionalId, inicio, fim, ignorarId);
     }
 
     /** O atendimento inteiro precisa caber dentro de UM período de trabalho. */
@@ -174,9 +298,7 @@ public class AgendamentoService {
     }
 
     private void verificarSePodeAlterar(Agendamento agendamento) {
-        if (agendamento.getStatus() == StatusAgendamento.CANCELADO
-                || agendamento.getStatus() == StatusAgendamento.CONCLUIDO
-                || agendamento.getStatus() == StatusAgendamento.FALTOU) {
+        if (!estaEmAberto(agendamento)) {
             throw new RegraNegocioException("Este agendamento não pode mais ser alterado.");
         }
         LocalDateTime prazo = agendamento.getInicio().minusHours(horasAntecedenciaCancelamento);
@@ -193,6 +315,22 @@ public class AgendamentoService {
     private Usuario buscarUsuario(Long id) {
         return usuarioRepository.findById(id)
                 .orElseThrow(() -> new RegraNegocioException("Usuário não encontrado."));
+    }
+
+    private Usuario buscarProfissionalAtivo(Long id) {
+        Usuario profissional = buscarUsuario(id);
+        if (profissional.getPerfil() != Perfil.PROFISSIONAL) {
+            throw new RegraNegocioException("O usuário escolhido não é um profissional.");
+        }
+        if (!profissional.isAtivo()) {
+            throw new RegraNegocioException("Este profissional não está mais atendendo.");
+        }
+        return profissional;
+    }
+
+    private static boolean estaEmAberto(Agendamento agendamento) {
+        return agendamento.getStatus() == StatusAgendamento.AGENDADO
+                || agendamento.getStatus() == StatusAgendamento.CONFIRMADO;
     }
 
     private Servico buscarServico(Long id) {

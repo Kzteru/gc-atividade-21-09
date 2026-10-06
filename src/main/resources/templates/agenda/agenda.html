@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Minha agenda')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+    <h1 class="af-titulo" th:text="${admin} ? 'Agenda dos profissionais' : 'Minha agenda'">Minha agenda</h1>
+    <th:block th:replace="~{fragments/layout :: mensagens}"></th:block>
+
+    <!-- Filtros: profissional (só admin), dia/semana e navegação -->
+    <div class="af-painel mb-4">
+        <form method="get" th:action="@{/agenda}" class="row g-3 align-items-end">
+            <div th:if="${admin}" class="col-lg-4">
+                <label class="form-label" for="profissionalId">Profissional</label>
+                <select class="form-select" id="profissionalId" name="profissionalId">
+                    <option value="">Todos os profissionais</option>
+                    <option th:each="p : ${profissionais}" th:value="${p.id}" th:selected="${p.id == profissionalId}"
+                            th:text="${p.ativo} ? ${p.nome} : ${p.nome} + ' (inativo)'">Carlos Barbeiro</option>
+                </select>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <label class="form-label" for="data">Data</label>
+                <input class="form-control" type="date" id="data" name="data" th:value="${data}">
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <label class="form-label" for="periodo">Mostrar</label>
+                <select class="form-select" id="periodo" name="periodo">
+                    <option value="dia" th:selected="${periodo == 'dia'}">Um dia</option>
+                    <option value="semana" th:selected="${periodo == 'semana'}">A semana inteira</option>
+                </select>
+            </div>
+            <div class="col-lg-2">
+                <button class="btn af-btn-primario w-100" type="submit">Abrir</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+        <div>
+            <h2 class="h4 mb-1" th:text="${tituloPeriodo}">Segunda-feira, 12 de outubro</h2>
+            <div class="text-body-secondary small"
+                 th:text="${totalAtendimentos} + (${totalAtendimentos == 1} ? ' atendimento' : ' atendimentos') + ' · R$ ' + ${#numbers.formatDecimal(valorPrevisto, 1, 'POINT', 2, 'COMMA')} + ' previstos'">
+                3 atendimentos · R$ 135,00 previstos
+            </div>
+        </div>
+        <nav class="btn-group" aria-label="Navegar na agenda">
+            <a class="btn btn-outline-primary"
+               th:href="@{/agenda(data=${anterior}, periodo=${periodo}, profissionalId=${profissionalId})}"
+               th:text="${periodo == 'semana'} ? '← Semana anterior' : '← Dia anterior'">&larr; Anterior</a>
+            <a class="btn btn-outline-primary"
+               th:href="@{/agenda(periodo=${periodo}, profissionalId=${profissionalId})}">Hoje</a>
+            <a class="btn btn-outline-primary"
+               th:href="@{/agenda(data=${proximo}, periodo=${periodo}, profissionalId=${profissionalId})}"
+               th:text="${periodo == 'semana'} ? 'Próxima semana →' : 'Próximo dia →'">Próximo &rarr;</a>
+        </nav>
+    </div>
+
+    <!-- Um bloco por dia -->
+    <section th:each="dia : ${dias}" class="mb-4">
+        <h3 th:if="${periodo == 'semana'}" class="h6 text-uppercase text-body-secondary mb-2">
+            <span th:text="${dia.rotulo}">Segunda-feira, 12 de outubro</span>
+            <span th:if="${dia.hoje}" class="badge af-badge-hoje ms-1">Hoje</span>
+        </h3>
+
+        <div th:if="${#lists.isEmpty(dia.agendamentos)}" class="af-painel text-body-secondary">
+            Nenhum atendimento.
+        </div>
+
+        <div th:unless="${#lists.isEmpty(dia.agendamentos)}" class="af-painel p-0 table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                <tr>
+                    <th>Horário</th>
+                    <th>Cliente</th>
+                    <th>Serviço</th>
+                    <th th:if="${admin}">Profissional</th>
+                    <th>Situação</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="a : ${dia.agendamentos}"
+                    th:classappend="${a.status.name() == 'CANCELADO'} ? 'af-inativo'">
+                    <td class="text-nowrap fw-bold"
+                        th:text="${#temporals.format(a.inicio, 'HH:mm')} + ' – ' + ${#temporals.format(a.fim, 'HH:mm')}">10:00 – 10:30</td>
+                    <td>
+                        <a th:href="@{/relatorios/clientes/{id}(id=${a.cliente.id})}" th:text="${a.cliente.nome}">Ana Cliente</a>
+                        <div th:if="${a.cliente.telefone}" class="small text-body-secondary" th:text="${a.cliente.telefone}"></div>
+                        <div th:if="${a.observacoesCliente}" class="small fst-italic" th:text="'“' + ${a.observacoesCliente} + '”'"></div>
+                    </td>
+                    <td>
+                        <span th:text="${a.servico.nome}">Corte de cabelo</span>
+                        <div class="small text-body-secondary"
+                             th:text="'R$ ' + ${#numbers.formatDecimal(a.valor, 1, 'POINT', 2, 'COMMA')}">R$ 40,00</div>
+                    </td>
+                    <td th:if="${admin}" th:text="${a.profissional.nome}">Carlos Barbeiro</td>
+                    <td><th:block th:replace="~{fragments/agendamento :: status(${a.status})}"></th:block></td>
+                    <td class="text-end">
+                        <div class="d-inline-flex flex-wrap justify-content-end gap-2">
+                            <form th:if="${confirmaveis.contains(a.id)}" method="post"
+                                  th:action="@{/agenda/{id}/confirmar(id=${a.id})}">
+                                <th:block th:replace="~{fragments/agendamento :: retornoAgenda}"></th:block>
+                                <button class="btn btn-sm af-btn-primario" type="submit">Confirmar</button>
+                            </form>
+                            <form th:if="${cancelaveis.contains(a.id)}" method="post"
+                                  th:action="@{/agenda/{id}/cancelar(id=${a.id})}"
+                                  onsubmit="return confirm('Cancelar este atendimento? O horário volta a ficar livre.');">
+                                <th:block th:replace="~{fragments/agendamento :: retornoAgenda}"></th:block>
+                                <button class="btn btn-sm btn-outline-danger" type="submit">Cancelar</button>
+                            </form>
+                            <form th:if="${pendentes.contains(a.id)}" method="post"
+                                  th:action="@{/agenda/{id}/resultado(id=${a.id})}" class="d-inline-flex gap-2">
+                                <th:block th:replace="~{fragments/agendamento :: retornoAgenda}"></th:block>
+                                <button class="btn btn-sm btn-success" type="submit" name="status" value="CONCLUIDO">Concluído</button>
+                                <button class="btn btn-sm btn-outline-danger" type="submit" name="status" value="FALTOU">Faltou</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>
