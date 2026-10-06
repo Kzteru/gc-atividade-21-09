@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Meus agendamentos')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <h1 class="af-titulo mb-0">Meus agendamentos</h1>
+        <a class="btn af-btn-primario" th:href="@{/agendamentos/novo}">Agendar um horário</a>
+    </div>
+    <th:block th:replace="~{fragments/layout :: mensagens}"></th:block>
+
+    <!-- Próximos -->
+    <h2 class="h5 mb-3">Próximos</h2>
+    <div th:if="${#lists.isEmpty(proximos)}" class="af-painel mb-5">
+        Você não tem nenhum horário marcado.
+        <a th:href="@{/agendamentos/novo}">Agende agora</a>.
+    </div>
+
+    <div th:unless="${#lists.isEmpty(proximos)}" class="mb-5">
+        <div th:each="a : ${proximos}" class="af-painel mb-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+                <div>
+                    <div class="fw-bold fs-5" th:text="${#temporals.format(a.inicio, 'dd/MM/yyyy')} + ' às ' + ${#temporals.format(a.inicio, 'HH:mm')}">12/10/2026 às 10:00</div>
+                    <div>
+                        <span th:text="${a.servico.nome}">Corte de cabelo</span>
+                        <span class="text-body-secondary" th:text="' com ' + ${a.profissional.nome}">com Carlos</span>
+                    </div>
+                    <div class="small text-body-secondary"
+                         th:text="'Até ' + ${#temporals.format(a.fim, 'HH:mm')} + ' · R$ ' + ${#numbers.formatDecimal(a.valor, 1, 'POINT', 2, 'COMMA')}">
+                        Até 10:30 · R$ 40,00
+                    </div>
+                    <div th:if="${a.observacoesCliente}" class="small mt-1">
+                        <strong>Sua observação:</strong> <span th:text="${a.observacoesCliente}"></span>
+                    </div>
+                </div>
+                <div class="text-lg-end">
+                    <th:block th:replace="~{fragments/agendamento :: status(${a.status})}"></th:block>
+                    <div th:if="${alteraveis.contains(a.id)}" class="d-flex gap-2 mt-2">
+                        <a class="btn btn-sm btn-outline-primary" th:href="@{/agendamentos/{id}/remarcar(id=${a.id})}">Remarcar</a>
+                        <form method="post" th:action="@{/agendamentos/{id}/cancelar(id=${a.id})}"
+                              onsubmit="return confirm('Cancelar este agendamento?');">
+                            <button class="btn btn-sm btn-outline-danger" type="submit">Cancelar</button>
+                        </form>
+                    </div>
+                    <div th:unless="${alteraveis.contains(a.id)}" class="small text-body-secondary mt-2">
+                        Prazo para cancelar ou remarcar encerrado.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Anteriores e cancelados -->
+    <h2 class="h5 mb-3">Anteriores e cancelados</h2>
+    <div th:if="${#lists.isEmpty(anteriores)}" class="af-painel">Nada por aqui ainda.</div>
+    <div th:unless="${#lists.isEmpty(anteriores)}" class="af-painel p-0 table-responsive">
+        <table class="table align-middle mb-0">
+            <thead>
+            <tr><th>Data</th><th>Serviço</th><th>Profissional</th><th>Valor</th><th>Situação</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="a : ${anteriores}">
+                <td class="text-nowrap" th:text="${#temporals.format(a.inicio, 'dd/MM/yyyy HH:mm')}">01/10/2026 10:00</td>
+                <td th:text="${a.servico.nome}">Corte</td>
+                <td th:text="${a.profissional.nome}">Carlos</td>
+                <td class="text-nowrap" th:text="'R$ ' + ${#numbers.formatDecimal(a.valor, 1, 'POINT', 2, 'COMMA')}">R$ 40,00</td>
+                <td><th:block th:replace="~{fragments/agendamento :: status(${a.status})}"></th:block></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

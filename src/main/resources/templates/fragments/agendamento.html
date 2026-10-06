@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<!--
+  Dupla 3: pedaços reaproveitados nas telas de agendamento.
+    <th:block th:replace="~{fragments/agendamento :: status(${a.status})}"></th:block>
+    <th:block th:replace="~{fragments/agendamento :: horarios(${horarios})}"></th:block>
+    <th:block th:replace="~{fragments/agendamento :: retornoAgenda}"></th:block>
+-->
+<body>
+
+<th:block th:fragment="status(status)">
+    <th:block th:switch="${status.name()}">
+        <span th:case="'CONCLUIDO'" class="badge text-bg-success">Concluído</span>
+        <span th:case="'FALTOU'" class="badge text-bg-danger">Faltou</span>
+        <span th:case="'CANCELADO'" class="badge text-bg-secondary">Cancelado</span>
+        <span th:case="'CONFIRMADO'" class="badge text-bg-info">Confirmado</span>
+        <span th:case="*" class="badge text-bg-warning">Agendado</span>
+    </th:block>
+</th:block>
+
+<!-- Botões de horário (rádio). Vai dentro de um <form> que tenha o botão de confirmar. -->
+<th:block th:fragment="horarios(horarios)">
+    <fieldset>
+        <legend class="form-label fs-6 mb-2">Horários livres</legend>
+        <div class="af-horarios">
+            <th:block th:each="h, i : ${horarios}">
+                <input type="radio" class="btn-check" name="inicio" required
+                       th:id="'horario-' + ${i.index}" th:value="${h}">
+                <label class="btn btn-outline-primary af-horario" th:for="'horario-' + ${i.index}"
+                       th:text="${#temporals.format(h, 'HH:mm')}">09:00</label>
+            </th:block>
+        </div>
+    </fieldset>
+</th:block>
+
+<!-- Campos escondidos dos formulários da "Minha agenda", para voltar ao mesmo dia/semana após a ação -->
+<th:block th:fragment="retornoAgenda">
+    <input type="hidden" name="data" th:value="${data}">
+    <input type="hidden" name="periodo" th:value="${periodo}">
+    <input type="hidden" name="profissionalId" th:value="${profissionalId}">
+</th:block>
+
+</body>
+</html>
