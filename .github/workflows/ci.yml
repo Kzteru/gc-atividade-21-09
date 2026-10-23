@@ -1,23 +1,31 @@
+# Workflow de integração contínua: compila e testa o projeto
 name: Build e testes
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main ]   # roda quando algo entra na main (ex.: PR mesclado)
   pull_request:
-    branches: [ main ]
+    branches: [ main ]   # roda em todo PR aberto para a main
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest   # máquina Linux nova a cada execução
     steps:
+      # Baixa o código do repositório
       - uses: actions/checkout@v4
+
+      # Instala o Java 17 e guarda as dependências do Maven em cache
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
           cache: maven
+
+      # Fixa a versão do Maven para o build ser reproduzível
       - uses: stCarolas/setup-maven@v5
         with:
           maven-version: 3.9.9
+
+      # Compila, roda os testes e gera o .jar; se falhar, o check fica vermelho
       - name: Compilar e rodar testes
         run: mvn -B verify
