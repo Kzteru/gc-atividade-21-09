@@ -9,27 +9,27 @@ e o projeto usa [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [1.2.0] - 2026-10-24
 
-<!-- TROQUE pelos itens REAIS entre v1.1.0 e v1.2.0, cada um com sua issue/PR. -->
+
 
 ### Adicionado
-- Tela de faturamento por período, serviço e profissional em `/relatorios` (#NN, PR #NN)
-- Workflow de release que gera o `.jar` e publica a GitHub Release ao enviar uma tag (#NN, PR #NN)
-- Este `CHANGELOG.md` (#NN, PR #NN)
+- Tela de faturamento por período, serviço e profissional em `/relatorios` (#32, PR #33)
+- Workflow de release que gera o `.jar` e publica a GitHub Release ao enviar uma tag (#32, PR #33)
+- Este `CHANGELOG.md` (#27, PR #28)
 
 ### Corrigido
-- Profissional não consegue mais alterar anotações ou o resultado de atendimentos de outro profissional (#NN, PR #NN)
+- Profissional não consegue mais alterar anotações ou o resultado de atendimentos de outro profissional (#27, PR #28)
 
 ### Alterado
-- Versão do `pom.xml` alinhada com a tag do Git (#NN, PR #NN)
+- Versão do `pom.xml` alinhada com a tag do Git (#33, PR #32)
 
 ## [1.1.0] - 2026-10-23
 
 ### Adicionado
 - Workflow de CI (`ci.yml`) que compila e roda os testes a cada push e Pull Request (#NN, PR #NN)
-- Workflow que exige o vínculo de uma issue em todo Pull Request (#NN, PR #NN)
+- Workflow que exige o vínculo de uma issue em todo Pull Request (#25, PR #26)
 
 ### Alterado
-- Branch `main` protegida, exigindo o check do CI para o merge (#NN)
+- Branch `main` protegida, exigindo o check do CI para o merge (#03)
 
 ## [1.0.0] - 2026-10-06
 
