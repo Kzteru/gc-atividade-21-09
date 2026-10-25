@@ -7,7 +7,7 @@ e o projeto usa [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não publicado]
 
-## [1.2.0] - 2026-MM-DD
+## [1.2.0] - 2026-10-24
 
 <!-- TROQUE pelos itens REAIS entre v1.1.0 e v1.2.0, cada um com sua issue/PR. -->
 
@@ -22,7 +22,7 @@ e o projeto usa [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 ### Alterado
 - Versão do `pom.xml` alinhada com a tag do Git (#NN, PR #NN)
 
-## [1.1.0] - 2026-MM-DD
+## [1.1.0] - 2026-10-05
 
 ### Adicionado
 - Workflow de CI (`ci.yml`) que compila e roda os testes a cada push e Pull Request (#NN, PR #NN)
