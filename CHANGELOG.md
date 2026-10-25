@@ -22,7 +22,7 @@ e o projeto usa [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 ### Alterado
 - Versão do `pom.xml` alinhada com a tag do Git (#NN, PR #NN)
 
-## [1.1.0] - 2026-10-05
+## [1.1.0] - 2026-10-23
 
 ### Adicionado
 - Workflow de CI (`ci.yml`) que compila e roda os testes a cada push e Pull Request (#NN, PR #NN)
@@ -31,7 +31,7 @@ e o projeto usa [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 ### Alterado
 - Branch `main` protegida, exigindo o check do CI para o merge (#NN)
 
-## [1.0.0] - 2026-MM-DD
+## [1.0.0] - 2026-10-06
 
 ### Adicionado
 - Login, cadastro de clientes, edição de perfil e cadastro de profissionais pelo admin
