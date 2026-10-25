@@ -101,4 +101,21 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> 
               and a.inicio < :ate
             """)
     BigDecimal faturamentoNoPeriodo(@Param("de") LocalDateTime de, @Param("ate") LocalDateTime ate);
+
+    /**
+     * Atendimentos CONCLUÍDOS no intervalo [de, ate) (tela de faturamento - dupla 4).
+     * Com profissionalId preenchido, traz só os daquele profissional; nulo, traz de todos.
+     * Quem decide qual id passar é o RelatorioService: o profissional nunca escolhe.
+     */
+    @Query("""
+            select a from Agendamento a
+            where a.status = br.com.agendafacil.model.StatusAgendamento.CONCLUIDO
+              and a.inicio >= :de
+              and a.inicio < :ate
+              and (:profissionalId is null or a.profissional.id = :profissionalId)
+            order by a.inicio
+            """)
+    List<Agendamento> concluidosNoPeriodo(@Param("profissionalId") Long profissionalId,
+                                          @Param("de") LocalDateTime de,
+                                          @Param("ate") LocalDateTime ate);
 }
