@@ -1,0 +1,61 @@
+# Salvar em: .github/workflows/release.yml
+# Roda quando uma tag v* é enviada (ex.: git push origin v1.2.0).
+# Compila, testa, gera o .jar e publica a Release com o jar anexado.
+name: Release
+
+on:
+  push:
+    tags: [ 'v*' ]
+
+permissions:
+  contents: write   # necessário para criar a Release e anexar o arquivo
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: 3.9.9
+
+      - name: Conferir se a tag bate com a versão do pom.xml
+        run: |
+          VERSAO_POM=$(mvn -q help:evaluate -Dexpression=project.version -DforceStdout)
+          if [ "v$VERSAO_POM" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME mas o pom.xml está em $VERSAO_POM"
+            exit 1
+          fi
+
+      - name: Compilar, testar e empacotar
+        run: mvn -B package
+
+      - name: Separar as notas desta versão do CHANGELOG
+        run: |
+          VERSAO="${GITHUB_REF_NAME#v}"
+          awk -v v="$VERSAO" '
+            /^## \[/ { dentro = index($0, "[" v "]") > 0; next }
+            dentro
+          ' CHANGELOG.md > notas.md
+          echo "Notas extraídas:"; cat notas.md
+
+      - name: Guardar o jar como artifact do Actions
+        uses: actions/upload-artifact@v4
+        with:
+          name: agendafacil-${{ github.ref_name }}
+          path: target/agendafacil-*.jar
+
+      - name: Publicar a GitHub Release com o jar anexado
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" target/agendafacil-*.jar \
+            --title "AgendaFácil $GITHUB_REF_NAME" \
+            --notes-file notas.md
